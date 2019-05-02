@@ -36,7 +36,8 @@ def vectorize_data(train, test):
 def train_logistic_regression(X_train, Y_train, X_test, Y_test):
     classifier = LogisticRegression(solver='lbfgs')
     classifier.fit(X_train, Y_train)
-    print("Logistic Regression Accuracy score: {}".format(classifier.score(X_test, Y_test)))
+    print("Logistic Regression Train accuracy: {}".format(classifier.score(X_train, Y_train)))
+    print("Logistic Regression Test accuracy: {}".format(classifier.score(X_test, Y_test)))
 
 def main():
     parser = create_parser()

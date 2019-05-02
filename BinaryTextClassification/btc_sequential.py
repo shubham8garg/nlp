@@ -4,7 +4,10 @@ import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
+from keras.models import Sequential
+from keras import layers
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def create_parser():
     description = 'Add some description'
@@ -33,22 +36,17 @@ def vectorize_data(train, test):
     vectorizer.fit(train)
     return vectorizer.transform(train), vectorizer.transform(test)
 
-def train_logistic_regression(X_train, Y_train, X_test, Y_test):
-    classifier = LogisticRegression(solver='lbfgs')
-    classifier.fit(X_train, Y_train)
-    print("Logistic Regression score: {}".format(classifier.score(X_test, Y_test)))
-
-def train_sequential_model():
-    from keras.models import Sequential
-    from keras import layers
-    print(X_train.shape)
+def train_sequential_model(X_train, Y_train, X_test, Y_test):
     input_dim = X_train.shape[1]
     model = Sequential()
     model.add(layers.Dense(10, input_dim=input_dim, activation='relu'))
     model.add(layers.Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    model.summary()
     model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)
+    train_loss, train_accuracy = model.evaluate(X_train, Y_train, verbose=False)
+    test_loss, test_accuracy = model.evaluate(X_test, Y_test, verbose=False)
+    print("Sequential Model Training Accuracy: {}".format(train_accuracy))
+    print("Sequential Model Test Accuracy: {}".format(test_accuracy))
     
 
 def main():
@@ -65,10 +63,7 @@ def main():
     X_train, X_test = vectorize_data(X_train, X_test)
 
     #Train a model
-    if args.model == 'logistic':
-        train_logistic_regression(X_train, Y_train, X_test, Y_test)
-    elif args.model == 'sequential':
-        train_sequential_model()
+    train_sequential_model(X_train, Y_train, X_test, Y_test)
 
 if __name__ == "__main__":
     main()
