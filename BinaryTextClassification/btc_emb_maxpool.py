@@ -15,7 +15,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from read_write_file.read_two_columns import read1
 from preprocess.tokenizer import tokenize_data
 from preprocess.padder import pad_data
-from models.emb_sequential import create_embedding_model
+from models.emb_maxpool import create_emb_max_model
 
 def create_parser():
     description = 'Add some description'
@@ -53,7 +53,7 @@ def main():
     X_test = pad_data(X_test, maxlen)
 
     #Create a model
-    model = create_embedding_model(vocab_size=(len(tokenizer.word_index) + 1), length=maxlen)
+    model = create_emb_max_model(vocab_size=(len(tokenizer.word_index) + 1), length=maxlen)
 
     #Train a model                                                   
     model_history = model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)   

@@ -16,9 +16,9 @@ tokenize_data:
                 Tokenizer automatically has filters such as punctuations to remove from words. !"#$%&()*+,-./:;<=>?@[\]^_`{|}~\t\n
                 It only use num - 1 words and use the last one for remaining words
 '''
-def tokenize_data(train, test, num):
+def tokenize_data(train, test, max_words):
     from keras.preprocessing.text import Tokenizer
-    tokenizer = Tokenizer(num_words=num)
+    tokenizer = Tokenizer(num_words=max_words)
     tokenizer.fit_on_texts(train)
 
     new_train = tokenizer.texts_to_sequences(train)

@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+####
+# Importing libraries
+####
 import argparse
-from read_write_file import read_two_column_file
 from sklearn.model_selection import train_test_split
-from preprocess import vectorize_data
-from models import train_sequential_model
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+####
+#Importing functions from other scripts
+####
+from read_write_file.read_two_columns import read1
+from preprocess.vectorizer import vectorize_data
+from models.sequential_model import create_sequential_model
+
 
 def create_parser():
     description = 'Add some description'
@@ -30,7 +39,7 @@ def main():
     args = parser.parse_args()
 
     #Read the whole file
-    X, Y = read_two_column_file(args.file)
+    X, Y = read1(args.file)
 
     #Splitting into train and test
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.test_size, random_state=1000)
@@ -38,20 +47,22 @@ def main():
     #Vectorize the data
     vectorizer, X_train, X_test = vectorize_data(X_train, X_test)
 
-
-    #Train a model                                                   
-    model = train_sequential_model(X_train, Y_train, X_test, Y_test)
+    #Create a model
+    model = create_sequential_model(input_dim=X_train.shape[1])
+    
+    #Train a model
+    model_history = model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)                                                   
+    
+    #Calculate Accuracy and Print that
     train_loss, train_accuracy = model.evaluate(X_train, Y_train, verbose=False)
     test_loss, test_accuracy = model.evaluate(X_test, Y_test, verbose=False)
     print("Sequential Model Training Accuracy: {}".format(train_accuracy))
     print("Sequential Model Test Accuracy: {}".format(test_accuracy))
 
-    
-
     #Plot
     if args.plot == True:
-        plt.style.use('ggplot')
-        plot_history(history)
+        from plots.plot_model import plot_history
+        plot_history(model_history)
 
 if __name__ == "__main__":
     main()
