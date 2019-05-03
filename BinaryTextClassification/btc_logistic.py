@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-from read_write_file import read_two_column_file
+from read_write_file.read_two_columns import read
 from sklearn.model_selection import train_test_split
-from preprocess import vectorize_data
-from models import train_logistic_regression
+from preprocess.vectorizer import vectorize_data
+from models.logistic_model import train_logistic_regression
 
 def create_parser():
     description = 'Add some description'
@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
 
     #Read the whole file
-    X, Y = read_two_column_file(args.file)
+    X, Y = read(args.file)
 
     #Splitting into train and test
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.test_size, random_state=1000)

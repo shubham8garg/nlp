@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
-import pandas as pd
+from read_write_file import read_two_column_file
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from keras.models import Sequential
-from keras import layers
+from preprocess import vectorize_data
+from models import train_sequential_model
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import matplotlib.pyplot as plt
-from preprocess import vectorize_data, tokenize_data
-
 
 def create_parser():
     description = 'Add some description'
@@ -29,66 +25,27 @@ def create_parser():
     optional_options_group.add_argument('--plot', '-p', required=False, help='File to be passed to this script', default=False, action='store_true')
     return parser
 
-def read_file(filepath):
-    total_data = pd.read_csv(filepath, names=['sentence', 'label'], sep='\t')
-    sentences = total_data['sentence'].values
-    labels = total_data['label'].values
-    return sentences, labels    
-
-
-def train_sequential_model(X_train, Y_train, X_test, Y_test):
-    input_dim = X_train.shape[1]
-    model = Sequential()
-    model.add(layers.Dense(10, input_dim=input_dim, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    history = model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)
-    train_loss, train_accuracy = model.evaluate(X_train, Y_train, verbose=False)
-    test_loss, test_accuracy = model.evaluate(X_test, Y_test, verbose=False)
-    print("Sequential Model Training Accuracy: {}".format(train_accuracy))
-    print("Sequential Model Test Accuracy: {}".format(test_accuracy))
-    return history
-
-def plot_history(history):
-    acc = history.history['acc']
-    val_acc = history.history['val_acc']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
-    x = range(1, len(acc) + 1)
-
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(x, acc, 'b', label='Training acc')
-    plt.plot(x, val_acc, 'r', label='Validation acc')
-    plt.title('Training and validation accuracy')
-    plt.legend()
-    plt.subplot(1, 2, 2)
-    plt.plot(x, loss, 'b', label='Training loss')
-    plt.plot(x, val_loss, 'r', label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.legend()
-    plt.savefig('seq_model.png')
-    
-
 def main():
     parser = create_parser()
     args = parser.parse_args()
 
     #Read the whole file
-    X, Y = read_file(args.file)
+    X, Y = read_two_column_file(args.file)
 
     #Splitting into train and test
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.test_size, random_state=1000)
-    print(X_train.shape)
-    print(X_train[0])
 
     #Vectorize the data
     vectorizer, X_train, X_test = vectorize_data(X_train, X_test)
-    print(X_train.shape)
-    print(X_train[0])
+
 
     #Train a model                                                   
-    history = train_sequential_model(X_train, Y_train, X_test, Y_test)
+    model = train_sequential_model(X_train, Y_train, X_test, Y_test)
+    train_loss, train_accuracy = model.evaluate(X_train, Y_train, verbose=False)
+    test_loss, test_accuracy = model.evaluate(X_test, Y_test, verbose=False)
+    print("Sequential Model Training Accuracy: {}".format(train_accuracy))
+    print("Sequential Model Test Accuracy: {}".format(test_accuracy))
+
     
 
     #Plot
