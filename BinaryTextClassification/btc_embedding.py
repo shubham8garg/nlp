@@ -3,13 +3,12 @@
 import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
 from keras.models import Sequential
 from keras import layers
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import matplotlib.pyplot as plt
-from preprocess import vectorize_data, tokenize_data
+from keras.preprocessing.text import Tokenizer
 
 
 def create_parser():
@@ -42,12 +41,12 @@ def train_sequential_model(X_train, Y_train, X_test, Y_test):
     model.add(layers.Dense(10, input_dim=input_dim, activation='relu'))
     model.add(layers.Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    history = model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)
+    trained_model = model.fit(X_train, Y_train, epochs=100, verbose=False, validation_data=(X_test, Y_test), batch_size=10)
     train_loss, train_accuracy = model.evaluate(X_train, Y_train, verbose=False)
     test_loss, test_accuracy = model.evaluate(X_test, Y_test, verbose=False)
     print("Sequential Model Training Accuracy: {}".format(train_accuracy))
     print("Sequential Model Test Accuracy: {}".format(test_accuracy))
-    return history
+    return trained_model
 
 def plot_history(history):
     acc = history.history['acc']
@@ -83,9 +82,7 @@ def main():
     print(X_train[0])
 
     #Vectorize the data
-    vectorizer, X_train, X_test = vectorize_data(X_train, X_test)
-    print(X_train.shape)
-    print(X_train[0])
+    X_train, X_test = vectorize_data(X_train, X_test)
 
     #Train a model                                                   
     history = train_sequential_model(X_train, Y_train, X_test, Y_test)
